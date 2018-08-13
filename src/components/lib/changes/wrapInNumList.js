@@ -15,7 +15,7 @@ function wrapInNumList(
     type?: string,
     data?: Object | Data
 ): Change {
-    debugger
+   
     const selectedBlocks = getHighestSelectedBlocks(change.value);
     type = type || opts.types[1];
 

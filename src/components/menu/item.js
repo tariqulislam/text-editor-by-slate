@@ -16,6 +16,14 @@ export const Icon = styled(({ className, ...rest }) => {
   vertical-align: text-bottom;
 `
 
+export const WarningMessage = styled('div')`
+  width: 900px;
+  height: 28px;
+  background-color: #f8b7b7;
+  padding: 10px 2px 2px 13px;
+  border-radius: 5px;
+`
+
 export const Menu = styled('div')`
   & > * {
     display: inline-block;

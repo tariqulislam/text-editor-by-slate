@@ -4,7 +4,7 @@ import { Editor } from 'slate-react'
 import Types from 'prop-types'
 import SlateTypes from 'slate-prop-types'
 import {  Value } from 'slate'
-import { Button, Icon, Toolbar }  from './menu/item'
+import { Button, Icon, Toolbar, WarningMessage }  from './menu/item'
 import  './editor.css'
 import {isKeyHotkey} from 'is-hotkey'
 import styled from 'react-emotion'
@@ -14,6 +14,8 @@ import PluginEditList from './lib'
 const plugin = PluginEditList();
 const DEFAULT_NODE = 'paragraph'
 const plugins = [plugin]
+
+const MAX_NODE_FOR_DOCUMENT = 10;
 
 // import { LAST_CHILD_TYPE_INVALID } from 'slate-schema-violations'
 
@@ -28,7 +30,7 @@ const initialValue = Value.fromJSON({
                         object: 'text',
                         leaves: [
                             {
-                                text: 'This is Paragraph'
+                                text: 'Enter Article Title Here'
                             }
                         ]
                     }
@@ -97,7 +99,9 @@ export default class TextEditor extends Component {
   constructor(props) {
       super(props)
       this.state = {
-          value: initialValue
+          value: initialValue,
+          warningState: false,
+          errMsg: ''
       }
   }
 
@@ -120,7 +124,17 @@ export default class TextEditor extends Component {
   }
 
   onChange = ({value}) => {
-     this.setState({value})
+    const rawContent  = value.toJSON();
+    const content = JSON.stringify(rawContent);
+
+    if(rawContent.document.nodes.length > MAX_NODE_FOR_DOCUMENT) {
+      this.setState({warningState: true, errMsg: 'You Node is exists the limit. please reduce the node limit when writing.'})
+    } else {
+      /* save the data to local storage for further usage */
+      localStorage.setItem('content', content)
+      this.setState({value, warningState: false, errMsg: ''})
+    }
+   
   }
 
   call(change) {
@@ -310,6 +324,7 @@ export default class TextEditor extends Component {
 
       return (
         <div className={`alignArticles`}>
+        
         <Toolbar>
         {this.renderMarkButton('bold', 'format_bold')}
         {this.renderMarkButton('italic', 'format_italic')}
@@ -327,6 +342,13 @@ export default class TextEditor extends Component {
           <input className={'hide'}  type="file" onChange={this.onFileChange} />
           </label>
         </Toolbar>
+        {
+          this.state.warningState ?
+          <WarningMessage>
+              {this.state.errMsg}
+          </WarningMessage> : null
+        }
+        
         <Editor
         placeholder={'Enter some text.....'}
         plugins={plugins}

@@ -12,12 +12,23 @@
   outline: inherit;
 }
 
+.iconColor:active {
+  color: black;
+}
+
+.iconColor:not(active) {
+  color: #ccc;
+}
+
 .iconColor {
   font-size: 18px !important;
   color: #ccc;
 }
 
+
+
 .alignArticles {
+  margin-top: 10px;
   margin-left: 20px;
   margin-right: 20px;
   width: 900px;
