@@ -6,7 +6,8 @@ import {
     getPreviousItem,
     getCurrentItem,
     getListForItem,
-    isList
+    isList,
+    getItemDepth
 } from '../utils';
 
 /**
@@ -15,6 +16,7 @@ import {
  * For first items in a list, does nothing.
  */
 function increaseItemDepth(opts: Options, change: Change): Change {
+    debugger
     const previousItem = getPreviousItem(opts, change.value);
     const currentItem = getCurrentItem(opts, change.value);
 
@@ -23,6 +25,11 @@ function increaseItemDepth(opts: Options, change: Change): Change {
     }
 
     if (!currentItem) {
+        return change;
+    }
+
+    const depth = getItemDepth(opts, change.value);
+    if (depth === 3) {
         return change;
     }
 

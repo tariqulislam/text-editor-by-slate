@@ -10,11 +10,12 @@ import { isList } from '../utils';
  * lists are merged together.
  */
 function wrapInList(
-    opts: Options,
+    opts:  Options,
     change: Change,
     type?: string,
     data?: Object | Data
 ): Change {
+    debugger
     const selectedBlocks = getHighestSelectedBlocks(change.value);
     type = type || opts.types[0];
 

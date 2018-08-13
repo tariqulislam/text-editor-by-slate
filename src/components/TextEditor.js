@@ -1,8 +1,10 @@
 import React, {Component} from 'react'
 import { Editor } from 'slate-react'
+
 import Types from 'prop-types'
 import SlateTypes from 'slate-prop-types'
-import {  Value } from 'slate'
+import {  Value, Change, Data } from 'slate'
+import type Options from './lib/Options'
 import { Button, Icon, Toolbar }  from './menu/item'
 import  './editor.css'
 import {isKeyHotkey} from 'is-hotkey'
@@ -302,7 +304,9 @@ export default class TextEditor extends Component {
         wrapInList,
         unwrapList,
         increaseItemDepth,
-        decreaseItemDepth
+        decreaseItemDepth,
+        unwrapListOL,
+        wrapInListOL
     } = plugin.changes
     const inList = plugin.utils.isSelectionInList(this.state.value)
 
@@ -318,7 +322,8 @@ export default class TextEditor extends Component {
           {this.renderBlockButton('block-quote', 'format_quote')}
           {this.renderBlockButton('ol_list', 'format_list_numbered')}
           {this.renderBlockButton('ul_list', 'format_list_bulleted')}
-        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i class="material-icons">border_left</i> </button>
+        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i class="material-icons">format_list_numbered</i> </button>
+        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i class="material-icons">format_list_bulleted</i> </button>
         <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(decreaseItemDepth)}><i class="material-icons">format_indent_decrease</i> </button>
         <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(increaseItemDepth)}><i class="material-icons">format_indent_increase</i></button>
         <button onClick={() => this.call(wrapInList)}>Wrap in list</button>
