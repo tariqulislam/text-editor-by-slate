@@ -3,8 +3,7 @@ import { Editor } from 'slate-react'
 
 import Types from 'prop-types'
 import SlateTypes from 'slate-prop-types'
-import {  Value, Change, Data } from 'slate'
-import type Options from './lib/Options'
+import {  Value } from 'slate'
 import { Button, Icon, Toolbar }  from './menu/item'
 import  './editor.css'
 import {isKeyHotkey} from 'is-hotkey'
@@ -140,8 +139,6 @@ export default class TextEditor extends Component {
   renderNode = props => {
       const { attributes, node, children, isFocused } = props
 
-    
-
       switch(node.type) {
           case 'image': {
               const src = node.data.get('src')
@@ -165,6 +162,7 @@ export default class TextEditor extends Component {
             return <p {...attributes}>{children}</p>
       }
   }
+
 
   renderMarkButton = (type, icon) => {
       const isActive = this.hasMark(type)
@@ -301,35 +299,31 @@ export default class TextEditor extends Component {
 
   render() {
     const {
+    
         wrapInList,
         unwrapList,
         increaseItemDepth,
         decreaseItemDepth,
-        unwrapListOL,
-        wrapInListOL
+        wrapInNumList,
     } = plugin.changes
     const inList = plugin.utils.isSelectionInList(this.state.value)
 
       return (
-        <div>
+        <div className={`alignArticles`}>
         <Toolbar>
         {this.renderMarkButton('bold', 'format_bold')}
         {this.renderMarkButton('italic', 'format_italic')}
         {this.renderMarkButton('underlined', 'format_underlined')}
         {this.renderMarkButton('code', 'code')}
         {this.renderBlockButton('heading-one', 'looks_one')}
-          {this.renderBlockButton('heading-two', 'looks_two')}
-          {this.renderBlockButton('block-quote', 'format_quote')}
-          {this.renderBlockButton('ol_list', 'format_list_numbered')}
-          {this.renderBlockButton('ul_list', 'format_list_bulleted')}
-        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i class="material-icons">format_list_numbered</i> </button>
-        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i class="material-icons">format_list_bulleted</i> </button>
-        <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(decreaseItemDepth)}><i class="material-icons">format_indent_decrease</i> </button>
-        <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(increaseItemDepth)}><i class="material-icons">format_indent_increase</i></button>
-        <button onClick={() => this.call(wrapInList)}>Wrap in list</button>
-        <button onClick={() => this.call(unwrapList)}>Unwrap from list</button>
+        {this.renderBlockButton('heading-two', 'looks_two')}
+        {this.renderBlockButton('block-quote', 'format_quote')}
+        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInNumList)}><i className={`material-icons iconColor`}>format_list_numbered</i> </button>
+        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i className={`material-icons iconColor`}>format_list_bulleted</i> </button>
+        <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(decreaseItemDepth)}><i className={`material-icons iconColor`}>format_indent_decrease</i> </button>
+        <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(increaseItemDepth)}><i class={`material-icons iconColor`}>format_indent_increase</i></button>
         <label>
-        <i class="material-icons">add_a_photo</i>
+        <i className={`material-icons iconColor`}>add_a_photo</i>
           <input className={'hide'}  type="file" onChange={this.onFileChange} />
           </label>
         </Toolbar>

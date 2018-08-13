@@ -6,7 +6,8 @@ import {
     unwrapList,
     splitListItem,
     increaseItemDepth,
-    decreaseItemDepth
+    decreaseItemDepth,
+    wrapInNumList
 } from './changes';
 import {
     getItemDepth,
@@ -52,7 +53,8 @@ function core(
             increaseItemDepth: bindAndScopeChange(opts, increaseItemDepth),
             splitListItem: bindAndScopeChange(opts, splitListItem),
             unwrapList: bindAndScopeChange(opts, unwrapList),
-            wrapInList: wrapInList.bind(null, opts)
+            wrapInList: wrapInList.bind(null, opts),
+            wrapInNumList: wrapInNumList.bind(null, opts)
         }
     };
 }

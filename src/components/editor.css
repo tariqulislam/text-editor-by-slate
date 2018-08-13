@@ -11,3 +11,14 @@
   cursor: pointer;
   outline: inherit;
 }
+
+.iconColor {
+  font-size: 18px !important;
+  color: #ccc;
+}
+
+.alignArticles {
+  margin-left: 20px;
+  margin-right: 20px;
+  width: 900px;
+}

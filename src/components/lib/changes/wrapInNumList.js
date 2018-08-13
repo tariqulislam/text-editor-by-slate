@@ -9,14 +9,15 @@ import { isList } from '../utils';
  * Wrap the blocks in the current selection in a new list. Selected
  * lists are merged together.
  */
-function wrapInList(
+function wrapInNumList(
     opts:  Options,
     change: Change,
     type?: string,
     data?: Object | Data
 ): Change {
+    debugger
     const selectedBlocks = getHighestSelectedBlocks(change.value);
-    type = type || opts.types[0];
+    type = type || opts.types[1];
 
     // Wrap in container
     change.wrapBlock(
@@ -64,4 +65,4 @@ function getHighestSelectedBlocks(value: Value): List<Block> {
     return ancestor.nodes.slice(startPath[0], endPath[0] + 1);
 }
 
-export default wrapInList;
+export default wrapInNumList;
