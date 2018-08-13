@@ -7,6 +7,13 @@ import { Button, Icon, Toolbar }  from './menu/item'
 import  './editor.css'
 import {isKeyHotkey} from 'is-hotkey'
 import styled from 'react-emotion'
+
+import PluginEditList from './lib'
+
+const plugin = PluginEditList();
+const DEFAULT_NODE = 'paragraph'
+const plugins = [plugin]
+
 // import { LAST_CHILD_TYPE_INVALID } from 'slate-schema-violations'
 
 const initialValue = Value.fromJSON({
@@ -106,11 +113,19 @@ export default class TextEditor extends Component {
     spellCheck: Types.bool,
     style: Types.object,
     tabIndex: Types.number,
+    isSelectionInList: Types.func,
+    getItemAtRange: Types.func,
     value: SlateTypes.value.isRequired,
   }
 
   onChange = ({value}) => {
      this.setState({value})
+  }
+
+  call(change) {
+      this.setState({
+          value: this.state.value.change().call(change).value
+      })
   }
 
   onFileChange = (event) => {
@@ -122,23 +137,28 @@ export default class TextEditor extends Component {
 
   renderNode = props => {
       const { attributes, node, children, isFocused } = props
+
+    
+
       switch(node.type) {
           case 'image': {
               const src = node.data.get('src')
               return <Image src={src} selected={isFocused} {...attributes} />
           }
+          case 'ul_list':
+             return <ul {...attributes}>{children}</ul>
+          case 'ol_list':
+             return <ol {...attributes}>{children}</ol>
+          case 'list_item':
+            return (
+                <li {...props.attributes}>{props.children}</li>    
+            );
             case 'block-quote':
              return <blockquote {...attributes}>{children}</blockquote>
-            case 'bulleted-list':
-            return <ul {...attributes}>{children}</ul>
             case 'heading-one':
             return <h1 {...attributes}>{children}</h1>
             case 'heading-two':
             return <h2 {...attributes}>{children}</h2>
-            case 'list-item':
-            return <li {...attributes}>{children}</li>
-            case 'numbered-list':
-            return <ol {...attributes}>{children}</ol>
             default:
             return <p {...attributes}>{children}</p>
       }
@@ -206,7 +226,86 @@ export default class TextEditor extends Component {
     }
   }
 
+  hasBlock = type => {
+    const { value } = this.state
+    return value.blocks.some(node => node.type === type)
+  }
+
+  onClickBlock = (event, type) => {
+    event.preventDefault()
+    const { value } = this.state
+    const change = value.change()
+    const { document } = value
+
+    // Handle everything but list buttons.
+    if (type !== 'ol_list' && type !== 'ul_list') {
+      const isActive = this.hasBlock(type)
+      const isList = this.hasBlock('list_item')
+
+      if (isList) {
+        change
+          .setBlocks(isActive ? DEFAULT_NODE : type)
+          .unwrapBlock('ul_list')
+          .unwrapBlock('ol_list')
+      } else {
+        change.setBlocks(isActive ? DEFAULT_NODE : type)
+      }
+    } else {
+      // Handle the extra wrapping required for list buttons.
+      const isList = this.hasBlock('list_item')
+      const isType = value.blocks.some(block => {
+        return !!document.getClosest(block.key, parent => parent.type === type)
+      })
+
+      if (isList && isType) {
+        change
+          .setBlocks(DEFAULT_NODE)
+          .unwrapBlock('ol_list')
+          .unwrapBlock('ul_list')
+      } else if (isList) {
+        change
+          .unwrapBlock(
+            type === 'ol-list' ? 'ul_list' : 'ol_list'
+          )
+          .wrapBlock(type)
+      } else {
+        change.setBlocks('list_item').wrapBlock(type)
+      }
+    }
+
+    this.onChange(change)
+  }
+
+
+  renderBlockButton = (type, icon) => {
+    let isActive = this.hasBlock(type)
+
+    if (['ol_list', 'ul_list'].includes(type)) {
+      const { value } = this.state
+      const parent = value.document.getParent(value.blocks.first().key)
+      isActive = this.hasBlock('list_item') && parent && parent.type === type
+    }
+
+    return (
+      <Button
+        active={isActive}
+        onMouseDown={event => this.onClickBlock(event, type)}
+      >
+        <Icon>{icon}</Icon>
+      </Button>
+    )
+  }
+
+
   render() {
+    const {
+        wrapInList,
+        unwrapList,
+        increaseItemDepth,
+        decreaseItemDepth
+    } = plugin.changes
+    const inList = plugin.utils.isSelectionInList(this.state.value)
+
       return (
         <div>
         <Toolbar>
@@ -214,17 +313,30 @@ export default class TextEditor extends Component {
         {this.renderMarkButton('italic', 'format_italic')}
         {this.renderMarkButton('underlined', 'format_underlined')}
         {this.renderMarkButton('code', 'code')}
+        {this.renderBlockButton('heading-one', 'looks_one')}
+          {this.renderBlockButton('heading-two', 'looks_two')}
+          {this.renderBlockButton('block-quote', 'format_quote')}
+          {this.renderBlockButton('ol_list', 'format_list_numbered')}
+          {this.renderBlockButton('ul_list', 'format_list_bulleted')}
+        <button className={'removeButton'} onClick={() => this.call(inList ? unwrapList : wrapInList)}><i class="material-icons">border_left</i> </button>
+        <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(decreaseItemDepth)}><i class="material-icons">format_indent_decrease</i> </button>
+        <button className={inList ? 'removeButton' : 'removeButton disabled'} onClick={() => this.call(increaseItemDepth)}><i class="material-icons">format_indent_increase</i></button>
+        <button onClick={() => this.call(wrapInList)}>Wrap in list</button>
+        <button onClick={() => this.call(unwrapList)}>Unwrap from list</button>
         <label>
         <i class="material-icons">add_a_photo</i>
           <input className={'hide'}  type="file" onChange={this.onFileChange} />
           </label>
         </Toolbar>
-        <Editor 
+        <Editor
+        placeholder={'Enter some text.....'}
+        plugins={plugins}
         value={this.state.value}
         onChange={this.onChange}
         onKeyDown={this.onKeyDown}
         renderNode={this.renderNode}
         renderMark={this.renderMark}
+        shouldNodeComponentUpdate={props => props.node.type === 'list_item' }
          />
         </div>
       )
